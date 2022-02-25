@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IKEA Restock Info
 // @namespace    https://github.com/Res42/ikea-restock-info/
-// @version      1.0
+// @version      1.1
 // @description  Lists restock information on IKEA product pages.
 // @author       Adam Reisinger
 // @match        http*://ikea.com/*/*/p/*
@@ -19,7 +19,7 @@
     // eg: https://www.ikea.com/hu/hu/p/omtaenksam-cipokanal-antracit-70378070/
     const [_, lang, item] = document.URL.match(/ikea.com\/([a-z]+)\/.*-([0-9]+)/);
     // eg: https://api.ingka.ikea.com/cia/availabilities/ru/hu?itemNos=70378070&expand=StoresList,Restocks,SalesLocations
-    const url = `https://api.ingka.ikea.com/cia/availabilities/ru/${lang}?itemNos=${item}&expand=StoresList,Restocks,SalesLocations`;
+    const url = `https://api.ingka.ikea.com/cia/availabilities/ru/${lang}?itemNos=${item}&expand=Restocks`;
     const stores = getStores();
 
     GM_xmlhttpRequest({
@@ -60,9 +60,17 @@
         const reliabilityEl = document.createElement("div");
         reliabilityEl.append(`Reliability: ${restock.reliability}`);
 
+        const quantityEl = document.createElement("div");
+        quantityEl.append(`Quantity: ${restock.quantity}`);
+
+        const updatedEl = document.createElement("div");
+        updatedEl.append(`Updated: ${restock.updateDateTime}`);
+
         el.append(storeEl);
         el.append(timeEl);
         el.append(reliabilityEl);
+        el.append(quantityEl);
+        el.append(updatedEl);
         containerEl.append(el);
     }
 
