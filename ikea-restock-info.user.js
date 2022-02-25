@@ -7,8 +7,8 @@
 // @match        http*://ikea.com/*/*/p/*
 // @match        http*://*.ikea.com/*/*/p/*
 // @connect      api.ingka.ikea.com
-// @updateURL    https://raw.githubusercontent.com/Res42/ikea-restock-info/master/ikea-restock-info.js
-// @downloadURL  https://raw.githubusercontent.com/Res42/ikea-restock-info/master/ikea-restock-info.js
+// @updateURL    https://raw.githubusercontent.com/Res42/ikea-restock-info/master/ikea-restock-info.user.js
+// @downloadURL  https://raw.githubusercontent.com/Res42/ikea-restock-info/master/ikea-restock-info.user.js
 // @icon         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAGpSURBVGhD7ZcxTgNBDEVTU3MBjsINEBUlouAcHCAXgJaCc6QOHSUFR+AIw/4oRp6fP7sTtMIayZaetPnxePw9mUVsyuCRBqIjDURHGoiONBAdaSA60kB0jG9gc/dahkaKIyHFGR63D+Xp5bY8v12X993Vga/9Zfn+uCjlc/pFdoBcrLH1qIWaN9t7uecsUnSgqDV7bqPn4o1hzy5DSuSm1Wb/QZcZFnCUkU23wOmgN+63MgCntsDrYElXE1L5jK0H2J+/52Ge5PgPPtnrYE5XG7fyGcsDagh+qAA9Vjn2gN+aT6ySJlo61rHWU4dRdQzurcq1B367/CYcaenM0iA8Ps+fImr408Czz0Wv9t3qBngzlWNYDk9faX4w0sDS5Fo6bwTwtliq41F3iPE1qz190pqX2C4f60xPDrCTbV5i4G+818GSrt4g6nQYrmn1WAeodzKs6sPE0H/IDEwTTuE40gz2tqmrEz4gRQeb4bfVmqB2V9MeKc6AojhKM/UXY75RaxY1uxpmpDgSUhyJ4//Gw0YaiI40EB1pIDrSQHSkgehIA9ExuIFSfgDhFZ69tkIangAAAABJRU5ErkJggg==
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
