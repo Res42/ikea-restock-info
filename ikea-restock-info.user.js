@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IKEA Restock Info
 // @namespace    https://github.com/Res42/ikea-restock-info
-// @version      1.3
+// @version      1.4
 // @description  Lists restock information on IKEA product pages.
 // @author       Adam Reisinger
 // @match        http*://ikea.com/*/*/p/*
@@ -14,9 +14,9 @@
 (function() {
     'use strict';
 
-    window.addEventListener('load', function() {
+    window.addEventListener('load', () => {
         const stores = getStores();
-        const restocks = unsafeWindow.RangeProductStatus.stockInfo.stores.flatMap(store => store.restocks.flatMap(restock => mapRestock(restock, stores[store.storeId])));
+        const restocks = unsafeWindow.RangeProductStatus.stockInfo.stores.flatMap(store => (store.restocks ?? []).flatMap(restock => mapRestock(restock, stores[store.storeId])));
 
         renderRestocks(restocks);
     }, false);
@@ -37,13 +37,14 @@
     }
 
     function renderRestocks(restocks) {
-        if (restocks.length === 0) {
-            return;
-        }
-
         const containerEl = document.querySelector('.range-revamp-product__buy-module-container');
         renderHeader(containerEl);
-        restocks.forEach(r => renderRestock(r, containerEl));
+
+        if (restocks.length === 0) {
+            renderNoInfo(containerEl);
+        } else {
+            restocks.forEach(r => renderRestock(r, containerEl));
+        }
     }
 
     function renderRestock(restock, containerEl) {
@@ -75,6 +76,13 @@
     function renderHeader(containerEl) {
         const el = document.createElement("h3");
         el.append("Restocks");
+
+        containerEl.append(el);
+    }
+
+    function renderNoInfo(containerEl) {
+        const el = document.createElement("p");
+        el.append("No restock information found.");
 
         containerEl.append(el);
     }
