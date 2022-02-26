@@ -1,29 +1,46 @@
 // ==UserScript==
 // @name         IKEA Restock Info
 // @namespace    https://github.com/Res42/ikea-restock-info
-// @version      1.4
+// @version      1.5
 // @description  Lists restock information on IKEA product pages.
 // @author       Adam Reisinger
 // @match        http*://ikea.com/*/*/p/*
 // @match        http*://*.ikea.com/*/*/p/*
 // @updateURL    https://raw.githubusercontent.com/Res42/ikea-restock-info/master/ikea-restock-info.user.js
 // @downloadURL  https://raw.githubusercontent.com/Res42/ikea-restock-info/master/ikea-restock-info.user.js
-// @icon         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAGpSURBVGhD7ZcxTgNBDEVTU3MBjsINEBUlouAcHCAXgJaCc6QOHSUFR+AIw/4oRp6fP7sTtMIayZaetPnxePw9mUVsyuCRBqIjDURHGoiONBAdaSA60kB0jG9gc/dahkaKIyHFGR63D+Xp5bY8v12X993Vga/9Zfn+uCjlc/pFdoBcrLH1qIWaN9t7uecsUnSgqDV7bqPn4o1hzy5DSuSm1Wb/QZcZFnCUkU23wOmgN+63MgCntsDrYElXE1L5jK0H2J+/52Ge5PgPPtnrYE5XG7fyGcsDagh+qAA9Vjn2gN+aT6ySJlo61rHWU4dRdQzurcq1B367/CYcaenM0iA8Ps+fImr408Czz0Wv9t3qBngzlWNYDk9faX4w0sDS5Fo6bwTwtliq41F3iPE1qz190pqX2C4f60xPDrCTbV5i4G+818GSrt4g6nQYrmn1WAeodzKs6sPE0H/IDEwTTuE40gz2tqmrEz4gRQeb4bfVmqB2V9MeKc6AojhKM/UXY75RaxY1uxpmpDgSUhyJ4//Gw0YaiI40EB1pIDrSQHSkgehIA9ExuIFSfgDhFZ69tkIangAAAABJRU5ErkJggg==
+// @grant        GM_addStyle
+// @grant        unsafeWindow
 // ==/UserScript==
 
 (function() {
     'use strict';
 
+    GM_addStyle(`
+        .restock-container {
+            width: max-content;
+        }
+
+        .restock-table th:not(:first-of-type),
+        .restock-table td:not(:first-of-type) {
+            padding-left: 0.25rem;
+        }
+
+        .restock-table th:not(:last-of-type),
+        .restock-table td:not(:last-of-type) {
+            padding-right: 0.25rem;
+        }
+    `);
+
     window.addEventListener('load', () => {
         const stores = getStores();
         const restocks = unsafeWindow.RangeProductStatus.stockInfo.stores.flatMap(store => (store.restocks ?? []).flatMap(restock => mapRestock(restock, stores[store.storeId])));
 
-        renderRestocks(restocks);
+        renderRestockBlock(restocks);
     }, false);
 
     function getStores() {
         return Object.keys(sessionStorage)
-            .filter(key => key.startsWith("nav-stores"))
+            .filter(key => key.startsWith('nav-stores'))
             .map(key => JSON.parse(sessionStorage.getItem(key)))
             .flatMap(stores => stores.data)
             .reduce((dict, store) => {
@@ -36,54 +53,51 @@
         return { ...restock, store };
     }
 
-    function renderRestocks(restocks) {
+    function renderRestockBlock(restocks) {
         const containerEl = document.querySelector('.range-revamp-product__buy-module-container');
-        renderHeader(containerEl);
 
-        if (restocks.length === 0) {
-            renderNoInfo(containerEl);
-        } else {
-            restocks.forEach(r => renderRestock(r, containerEl));
-        }
+        const template = `
+            <section class="restock-container">
+                <h3>Restocks</h3>
+                ${restocks.length ? renderRestocks(restocks) : renderNoInfo()}
+            </section>
+        `;
+
+        containerEl.insertAdjacentHTML('beforeend', template);
     }
 
-    function renderRestock(restock, containerEl) {
-        const el = document.createElement("p");
-
-        const storeEl = document.createElement("div");
-        storeEl.append(`Store: ${restock.store}`);
-
-        const timeEl = document.createElement("div");
-        timeEl.append(`Between: ${restock.earliestDate} - ${restock.latestDate}`);
-
-        const reliabilityEl = document.createElement("div");
-        reliabilityEl.append(`Reliability: ${restock.reliability}`);
-
-        const quantityEl = document.createElement("div");
-        quantityEl.append(`Quantity: ${restock.quantity}`);
-
-        const updatedEl = document.createElement("div");
-        updatedEl.append(`Updated: ${restock.updateDateTime}`);
-
-        el.append(storeEl);
-        el.append(timeEl);
-        el.append(reliabilityEl);
-        el.append(quantityEl);
-        el.append(updatedEl);
-        containerEl.append(el);
+    function renderRestocks(restocks) {
+        return `
+            <table class="restock-table">
+                <thead>
+                    <tr>
+                        <th>Store</th>
+                        <th>Between</th>
+                        <th>Reliability</th>
+                        <th>Quantity</th>
+                        <th>Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${restocks.map(restock => renderRestock(restock)).join('')}
+                </tbody>
+            </table>
+        `;
     }
 
-    function renderHeader(containerEl) {
-        const el = document.createElement("h3");
-        el.append("Restocks");
-
-        containerEl.append(el);
+    function renderRestock(restock) {
+        return `
+            <tr>
+                <td>${restock.store}</td>
+                <td>${new Date(restock.earliestDate).toLocaleDateString()} - ${new Date(restock.latestDate).toLocaleDateString()}</td>
+                <td>${restock.reliability}</td>
+                <td>${restock.quantity}</td>
+                <td>${new Date(restock.updateDateTime).toLocaleString()}</td>
+            </tr>
+        `;
     }
 
-    function renderNoInfo(containerEl) {
-        const el = document.createElement("p");
-        el.append("No restock information found.");
-
-        containerEl.append(el);
+    function renderNoInfo() {
+        return `<p>No restock information found.</p>`;
     }
 })();
