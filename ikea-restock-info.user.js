@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IKEA Restock Info
 // @namespace    https://github.com/Res42/ikea-restock-info
-// @version      1.2
+// @version      1.3
 // @description  Lists restock information on IKEA product pages.
 // @author       Adam Reisinger
 // @match        http*://ikea.com/*/*/p/*
@@ -14,10 +14,12 @@
 (function() {
     'use strict';
 
-    const stores = getStores();
-    const restocks = unsafeWindow.RangeProductStatus.stockInfo.stores.flatMap(store => store.restocks.flatMap(restock => mapRestock(restock, stores[store.storeId])));
+    window.addEventListener('load', function() {
+        const stores = getStores();
+        const restocks = unsafeWindow.RangeProductStatus.stockInfo.stores.flatMap(store => store.restocks.flatMap(restock => mapRestock(restock, stores[store.storeId])));
 
-    renderRestocks(restocks);
+        renderRestocks(restocks);
+    }, false);
 
     function getStores() {
         return Object.keys(sessionStorage)
