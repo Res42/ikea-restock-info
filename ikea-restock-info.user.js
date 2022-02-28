@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IKEA Restock Info
 // @namespace    https://github.com/Res42/ikea-restock-info
-// @version      1.6
+// @version      1.7
 // @description  Lists restock information on IKEA product pages.
 // @author       Adam Reisinger
 // @match        http*://ikea.com/*/*/p/*
@@ -31,19 +31,20 @@
         }
     `);
 
-    const stores = getStores();
+    waitFor(() => unsafeWindow.RangeProductStatus, (RangeProductStatus) => {
+        waitFor(() => storeSelector().length, () => {
+            const stores = getStores();
+            const restocks = RangeProductStatus.stockInfo.stores.flatMap(store => (store.restocks ?? []).flatMap(restock => mapRestock(restock, stores[store.storeId])));
 
-    waitForProperty(unsafeWindow, 'RangeProductStatus', (RangeProductStatus) => {
-        const restocks = RangeProductStatus.stockInfo.stores.flatMap(store => (store.restocks ?? []).flatMap(restock => mapRestock(restock, stores[store.storeId])));
-
-        renderRestockBlock(restocks);
+            renderRestockBlock(restocks);
+        });
     });
 
-    function waitForProperty(objectToWatch, propertyName, callback) {
+    function waitFor(selector, callback) {
         const check = () => {
-            const currentProps = Object.keys(objectToWatch);
-            if (Object.keys(objectToWatch).includes(propertyName)) {
-                callback(objectToWatch[propertyName]);
+            const waitingForThis = selector();
+            if (waitingForThis) {
+                callback(waitingForThis);
             } else {
                 requestAnimationFrame(check);
             }
@@ -51,9 +52,13 @@
         requestAnimationFrame(check);
     }
 
-    function getStores() {
+    function storeSelector() {
         return Object.keys(sessionStorage)
-            .filter(key => key.startsWith('nav-stores'))
+            .filter(key => key.startsWith('nav-stores'));
+    }
+
+    function getStores() {
+        return storeSelector()
             .map(key => JSON.parse(sessionStorage.getItem(key)))
             .flatMap(stores => stores.data)
             .reduce((dict, store) => {
