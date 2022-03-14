@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IKEA Restock Info
 // @namespace    https://github.com/Res42/ikea-restock-info
-// @version      1.7
+// @version      1.8
 // @description  Lists restock information on IKEA product pages.
 // @author       Adam Reisinger
 // @match        http*://ikea.com/*/*/p/*
@@ -72,7 +72,7 @@
     }
 
     function renderRestockBlock(restocks) {
-        const containerEl = document.querySelector('.range-revamp-product__buy-module-container');
+        const containerEl = document.querySelector('.pip-product__buy-module-container');
 
         const template = `
             <section class="restock-container">
